@@ -1,0 +1,27 @@
+{
+	"name": "caiohsj/checkout-transparente-pagseguro",
+	"description": "Checkout Transparente com Pagseguro",
+	"minimum-stability": "stable",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Caio Henrique",
+			"email": "caiohenrique.programador@gmail.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"Source\\": "source/"
+		},
+		"files": [
+			"source/Config.php"
+		]
+	},
+	"require": {
+		"php": "^7.3",
+		"ext-pdo": "*",
+		"coffeecode/router": "1.0.*",
+                "mashape/unirest-php": "3.0.4",
+                "rain/raintpl": ">=3.0.0"
+	}
+}
