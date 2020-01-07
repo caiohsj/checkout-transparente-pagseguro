@@ -9,5 +9,5 @@ define("BASE_URL", "http://localhost/checkout-transparente-pagseguro");
 
 define("PAGSEGURO_CONFIG", [
     "email" => "caiocoxim10@gmail.com",
-    "token" => "B0720D12F0BE47E991BAEF4E7D6B34E8"
+    "token" => "325749FD774C4FC981772103EA4F4078"
 ]);
