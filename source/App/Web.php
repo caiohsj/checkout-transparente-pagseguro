@@ -25,14 +25,38 @@ class Web
     {
         $session = Pagseguro::getSession();
         
+        $product = new \stdClass();
+        $product->id = 2;
+        $product->amount = '100.00';
+        $product->description = 'Notebook Acer Core i5';
         
-        $data = [
+        $data = array(
             'title' => 'Home',
             'teste' => 'Hello',
-            'session' => $session
-        ];
+            'session' => $session,
+            'product' => $product
+        );
         $this->view->assignData($data);
         $this->view->draw('home');
+    }
+    
+    public function checkout()
+    {
+        $product = new \stdClass();
+        $product->id = 2;
+        $product->amount = '100.00';
+        $product->description = 'Notebook Acer Core i5';
+        $product->quantity = 1;
+
+        if($_POST['paymentMethod'] === 'creditCard')
+            $post = Pagseguro::getDataCreditCardCheckout($_POST, $product);
+
+        if($_POST['paymentMethod'] === 'boleto')
+            $post = Pagseguro::getDataBoletoCheckout($_POST, $product);
+        
+        $response = Pagseguro::setCheckout($post);
+        
+        echo '<a href="{$response->paymentLink}">Boleto</a>';
     }
     
     public function error()

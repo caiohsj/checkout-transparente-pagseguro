@@ -7,6 +7,7 @@ $router = new CoffeeCode\Router\Router(BASE_URL);
 $router->namespace("Source\\App");
 
 $router->get("/", "Web:home", "site.home");
+$router->post("/", "Web:checkout", "site.checkout");
 $router->get("/error", "Web:error", "site.error");
 
 /**
