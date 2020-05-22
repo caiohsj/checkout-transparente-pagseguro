@@ -8,6 +8,7 @@ $router->namespace("Source\\App");
 
 $router->get("/", "Web:home", "site.home");
 $router->post("/", "Web:checkout", "site.checkout");
+$router->post("/", "Web:notification", "site.notification");
 $router->get("/error", "Web:error", "site.error");
 
 /**

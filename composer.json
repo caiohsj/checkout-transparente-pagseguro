@@ -18,10 +18,10 @@
 		]
 	},
 	"require": {
-		"php": "^7.3",
+		"php": "^7.1",
 		"ext-pdo": "*",
 		"coffeecode/router": "1.0.*",
-                "mashape/unirest-php": "3.0.4",
-                "rain/raintpl": ">=3.0.0"
+        "mashape/unirest-php": "3.0.4",
+        "league/plates": "v4.0.0-alpha"
 	}
 }
