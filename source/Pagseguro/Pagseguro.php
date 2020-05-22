@@ -1,7 +1,9 @@
 <?php
 
-/* 
+/**
  * Classe responsável por consumir API do pagseguro
+ * 
+ * @author Caio Henrique <caiohenrique.programador@gmail.com>
  */
 
 namespace Source\Pagseguro;

@@ -1,18 +1,17 @@
 <?php
-
-/* 
- * Classe responsável por consumir API do Pagseguro
+/**
+ * @author Caio Henrique <caiohenrique.programador@gmail.com>
  */
-
 namespace Source\Pagseguro;
 
 use Unirest\Request;
 use Unirest\Request\Body;
 
-class Pagseguro
+class Payment
 {
     private $paymentMode = "default";
     private $paymentMethod = "boleto";
+    private $bankName = null;
     private $receiverEmail = PAGSEGURO_CONFIG["email"];
     private $currency = 'BRL';
     private $extraAmount = '0.00';
@@ -39,7 +38,7 @@ class Pagseguro
     private $creditCardToken = null;
     private $installmentQuantity = null;
     private $installmentValue = null;
-    private $noInterestInstallmentQuantity = null;
+    private $noInterestInstallmentQuantity = '10';
     private $creditCardHolderName = null;
     private $creditCardHolderCPF = null;
     private $creditCardHolderBirthDate = null;
@@ -170,9 +169,9 @@ class Pagseguro
      * @param string $description
      * @param float $amount
      * @param integer $quantity
-     * @return Pagseguro
+     * @return Payment
      */
-    public function setItem(int $id, string $description, float $amount, int $quantity): Pagseguro
+    public function setItem(int $id, string $description, float $amount, int $quantity): Payment
     {
         $itemsQuantity = count($this->items);
         $nextPosition = $itemsQuantity+1;
@@ -185,43 +184,43 @@ class Pagseguro
         return $this;
     }
 
-    public function setNotificationURL(string $url): Pagseguro
+    public function setNotificationURL(string $url): Payment
     {
         $this->notificationURL = filter_var($url, FILTER_VALIDATE_URL);
 
         return $this;
     }
 
-    public function setExtraAmount(float $amount): Pagseguro
+    public function setExtraAmount(float $amount): Payment
     {
-        $amount = number_format($amount,2,'.','');
+        $amount = number_format($amount, 2, "", "");
         $this->extraAmount = "{$amount}";
 
         return $this;
     }
 
-    public function setReference(string $ref): Pagseguro
+    public function setReference(string $ref): Payment
     {
         $this->reference = filter_var($ref, FILTER_SANITIZE_STRING);
 
         return $this;
     }
 
-    public function setSenderName(string $name): Pagseguro
+    public function setSenderName(string $name): Payment
     {
         $this->senderName = filter_var($name, FILTER_SANITIZE_STRING);
 
         return $this;
     }
 
-    public function setSenderCPF(string $cpf): Pagseguro
+    public function setSenderCPF(string $cpf): Payment
     {
         $this->senderCPF = filter_var($cpf, FILTER_SANITIZE_STRING);
 
         return $this;
     }
 
-    public function setSenderAreaCode(int $areaCode): Pagseguro
+    public function setSenderAreaCode(int $areaCode): Payment
     {
         $areaCode = filter_var($areaCode, FILTER_VALIDATE_INT);
         $this->senderAreaCode = "{$areaCode}";
@@ -229,23 +228,221 @@ class Pagseguro
         return $this;
     }
 
-    public function setSenderPhone(string $phone): Pagseguro
+    public function setSenderPhone(string $phone): Payment
     {
         $this->senderPhone = filter_var($phone, FILTER_SANITIZE_STRING);
 
         return $this;
     }
 
-    public function setSenderEmail(string $email): Pagseguro
+    public function setSenderEmail(string $email): Payment
     {
         $this->senderEmail = filter_var($email, FILTER_VALIDATE_EMAIL);
 
         return $this;
     }
 
-    public function setSenderHash(string $hash): Pagseguro
+    public function setSenderHash(string $hash): Payment
     {
         $this->senderHash = filter_var($hash, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressStreet(string $street): Payment
+    {
+        $this->shippingAddressStreet = filter_var($street, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressNumber(int $number): Payment
+    {
+        $number = filter_var($number, FILTER_VALIDATE_INT);
+        $this->shippingAddressNumber = "{$number}";
+
+        return $this;
+    }
+
+    public function setShippingAddressComplement(string $complement): Payment
+    {
+        $this->shippingAddressComplement = filter_var($complement, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressDistrict(string $district): Payment
+    {
+        $this->shippingAddressDistrict = filter_var($district, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressPostalCode(string $postalCode): Payment
+    {
+        $this->shippingAddressPostalCode = filter_var($postalCode, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressCity(string $city): Payment
+    {
+        $this->shippingAddressCity = filter_var($city, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressState(string $state): Payment
+    {
+        $this->shippingAddressState = filter_var($state, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingAddressCountry(string $country): Payment
+    {
+        $this->shippingAddressCountry = filter_var($country, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setShippingType(int $type): Payment
+    {
+        $type = filter_var($country, FILTER_VALIDATE_INT);
+        $this->shippingType = "{$type}";
+
+        return $this;
+    }
+
+    public function setShippingCost(float $cost): Payment
+    {
+        $cost = number_format($cost, 2, ".", "");
+        $this->shippingCost = $cost;
+
+        return $this;
+    }
+
+    public function setCreditCardToken(string $token): Payment
+    {
+        $this->creditCardToken = filter_var($token, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setInstallmentQuantity(int $quantity): Payment
+    {
+        $quantity = filter_var($quantity, FILTER_VALIDATE_INT);
+        $this->installmentQuantity = "{$quantity}";
+
+        return $this;
+    }
+
+    public function setInstallmentValue(float $value): Payment
+    {
+        $value = number_format($value, 2, ".", "");
+        $this->installmentValue = $value;
+
+        return $this;
+    }
+
+    public function setNoInterestInstallmentQuantity(int $quantity): Payment
+    {
+        $quantity = filter_var($quantity, FILTER_VALIDATE_INT);
+        $this->noInterestInstallmentQuantity = "{$quantity}";
+
+        return $this;
+    }
+
+    public function setCreditCardHolderName(string $name): Payment
+    {
+        $this->creditCardHolderName = filter_var($name, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setCreditCardHolderCPF(string $cpf): Payment
+    {
+        $this->creditCardHolderCPF = filter_var($cpf, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setCreditCardHolderBirthDate(string $birth): Payment
+    {
+        $birth = filter_var($birth, FILTER_SANITIZE_STRING);
+        $this->creditCardHolderBirthDate = date("d/m/Y", strtotime($birth));
+
+        return $this;
+    }
+
+    public function setCreditCardHolderAreaCode(int $areaCode): Payment
+    {
+        
+        $this->creditCardHolderAreaCode = "{$areaCode}";
+
+        return $this;
+    }
+
+    public function setCreditCardHolderPhone(string $phone): Payment
+    {
+        $this->creditCardHolderPhone = filter_var($phone, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressStreet(string $street): Payment
+    {
+        $this->billingAddressStreet = filter_var($street, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressNumber(int $number): Payment
+    {
+        $number = filter_var($number, FILTER_VALIDATE_INT);
+        $this->billingAddressNumber = "{$number}";
+
+        return $this;
+    }
+
+    public function setBillingAddressComplement(string $complement): Payment
+    {
+        $this->billingAddressComplement = filter_var($complement, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressDistrict(string $district): Payment
+    {
+        $this->billingAddressDistrict = filter_var($district, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressPostalCode(string $postalCode): Payment
+    {
+        $this->billingAddressPostalCode = filter_var($postalCode, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressCity(string $city): Payment
+    {
+        $this->billingAddressCity = filter_var($city, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressState(string $state): Payment
+    {
+        $this->billingAddressState = filter_var($state, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBillingAddressCountry(string $country): Payment
+    {
+        $this->billingAddressCountry = filter_var($country, FILTER_SANITIZE_STRING);
 
         return $this;
     }
