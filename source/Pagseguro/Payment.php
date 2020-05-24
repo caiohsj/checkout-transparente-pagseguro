@@ -6,6 +6,7 @@ namespace Source\Pagseguro;
 
 use Unirest\Request;
 use Unirest\Request\Body;
+use Source\Pagseguro\Exceptions\PaymentException;
 
 class Payment
 {
@@ -24,7 +25,7 @@ class Payment
     private $senderPhone = null;
     private $senderEmail = null;
     private $senderHash = null;
-    private $shippingAddressRequired = 'false';
+    private $shippingAddressRequired = 'true';
     private $shippingAddressStreet = null;
     private $shippingAddressNumber = null;
     private $shippingAddressComplement = null;
@@ -32,7 +33,7 @@ class Payment
     private $shippingAddressPostalCode = null;
     private $shippingAddressCity = null;
     private $shippingAddressState = null;
-    private $shippingAddressCountry = null;
+    private $shippingAddressCountry = 'BRA';
     private $shippingType = null;
     private $shippingCost = null;
     private $creditCardToken = null;
@@ -52,8 +53,12 @@ class Payment
     private $billingAddressCity = null;
     private $billingAddressState = null;
     private $billingAddressCountry = 'BRA';
+
+    const BOLETO = "boleto";
+    const CREDIT_CARD = "creditCard";
+    const ONLINE_DEBIT = "eft";
     
-    private function setCheckout(array $data)
+    public function checkout()
     {
         $headers = array(
             "Content-Type" => "application/x-www-form-urlencoded;charset=ISO-8859-1"
@@ -67,11 +72,17 @@ class Payment
         $xml = simplexml_load_string($response->body);
         
         $json = json_decode(json_encode($xml));
+
+        if (isset($json->error)) {
+            foreach ($response->error as $error) {
+                throw new PaymentException("Cód. {$error->code} => {$error->message}");
+            }
+        }
         
         return $json;
     }
 
-    public function creditCardCheckout()
+    private function getDataCreditCardCheckout()
     {
         $post['paymentMode'] = $this->paymentMode;
         $post['paymentMethod'] = $this->paymentMethod;
@@ -119,13 +130,11 @@ class Payment
         $post['billingAddressCity'] = $this->billingAddressCity;
         $post['billingAddressState'] = $this->billingAddressState;
         $post['billingAddressCountry'] = $this->billingAddressCountry;
-        
-        $response = $this->setCheckout($post);
 
-        return $response;
+        return $post;
     }
 
-    public function boletoCheckout()
+    private function getDataBoletoCheckout()
     {
         $post['paymentMode'] = $this->paymentMode;
         $post['paymentMethod'] = $this->paymentMethod;
@@ -157,9 +166,7 @@ class Payment
         $post['shippingType'] = $this->shippingType;
         $post['shippingCost'] = $this->shippingCost;
         
-        $response = $this->setCheckout($post);
-
-        return $response;
+        return $post;
     }
 
     /**
@@ -181,6 +188,20 @@ class Payment
             "itemAmount".$nextPosition => number_format($amount,2,'.',''),
             "itemQuantity".$nextPosition => "{$quantity}"
         ];
+        return $this;
+    }
+
+    public function setPaymentMethod(string $method): Payment
+    {
+        $this->paymentMethod = filter_var($method, FILTER_SANITIZE_STRING);
+
+        return $this;
+    }
+
+    public function setBankName(string $bank): Payment
+    {
+        $this->bankName = filter_var($bank, FILTER_SANITIZE_STRING);
+
         return $this;
     }
 
